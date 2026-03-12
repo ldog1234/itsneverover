@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
@@ -42,15 +43,29 @@ export default async function DashboardPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  const scores = (analyses ?? [])
+  const analysesWithUrls = await Promise.all(
+    (analyses ?? []).map(async (item) => {
+      const { data } = await supabase.storage
+        .from("photos")
+        .createSignedUrl(item.image_path, 60 * 60);
+
+      return {
+        ...item,
+        signedUrl: data?.signedUrl ?? null,
+      };
+    })
+  );
+
+  const scores = analysesWithUrls
     .map((item) => item.presentation_score)
     .filter((score): score is number => typeof score === "number");
 
   const bestScore = scores.length ? Math.max(...scores) : 0;
   const averageScore = getAverage(scores);
-  const streak = getStreak((analyses ?? []).map((item) => item.created_at));
-  const latestScore = analyses?.[0]?.presentation_score ?? null;
-  const isPersonalBest = latestScore != null && latestScore === bestScore && scores.length > 0;
+  const streak = getStreak(analysesWithUrls.map((item) => item.created_at));
+  const latestScore = analysesWithUrls[0]?.presentation_score ?? null;
+  const isPersonalBest =
+    latestScore != null && latestScore === bestScore && scores.length > 0;
 
   return (
     <main className="page">
@@ -72,7 +87,9 @@ export default async function DashboardPage() {
 
         <div className="miniScoreCard">
           <span className="miniScoreLabel">Uploads Logged</span>
-          <strong className="miniScoreValue">{analyses?.length ?? 0}</strong>
+          <strong className="miniScoreValue">
+            {analysesWithUrls.length}
+          </strong>
         </div>
 
         <div className="miniScoreCard">
@@ -90,113 +107,121 @@ export default async function DashboardPage() {
       {error ? <p className="mutedText">Failed to load reports.</p> : null}
 
       <div className="dashboardList">
-        {analyses?.length ? (
-          analyses.map((item, index) => {
-            const previous = analyses[index + 1];
+        {analysesWithUrls.length ? (
+          analysesWithUrls.map((item, index) => {
+            const previous = analysesWithUrls[index + 1];
             const change = getChange(
               item.presentation_score ?? null,
               previous?.presentation_score ?? null
             );
 
-            const imageUrl = `https://lpyoigzrqifcxajijwsr.supabase.co/storage/v1/object/public/photos/${item.image_path}`;
-
             return (
-              <div className="card trackerCard" key={item.id}>
-                <div className="trackerImageWrap">
-                  <img
-                    src={imageUrl}
-                    alt="Saved analysis"
-                    className="trackerImage"
-                  />
-                </div>
-
-                <div className="trackerContent">
-                  <div className="trackerTopRow">
-                    <div>
-                      <h3 className="trackerTitle">Appearance Report</h3>
-                      <p className="mutedText">
-                        {new Date(item.created_at).toLocaleString()}
-                      </p>
-                    </div>
-
-                    <div className="trackerGradeBadge">
-                      Grade {item.grade || "-"}
-                    </div>
+              <Link
+                href={`/report/${item.id}`}
+                key={item.id}
+                className="trackerLinkCard"
+              >
+                <div className="card trackerCard">
+                  <div className="trackerImageWrap">
+                    {item.signedUrl ? (
+                      <img
+                        src={item.signedUrl}
+                        alt="Saved analysis"
+                        className="trackerImage"
+                      />
+                    ) : (
+                      <div className="emptyPreview">Image unavailable</div>
+                    )}
                   </div>
 
-                  <div className="trackerStats">
-                    <div className="miniScoreCard">
-                      <span className="miniScoreLabel">Current</span>
-                      <strong className="miniScoreValue">
-                        {item.presentation_score ?? "-"}
-                      </strong>
+                  <div className="trackerContent">
+                    <div className="trackerTopRow">
+                      <div>
+                        <h3 className="trackerTitle">Appearance Report</h3>
+                        <p className="mutedText">
+                          {new Date(item.created_at).toLocaleString()}
+                        </p>
+                      </div>
+
+                      <div className="trackerGradeBadge">
+                        Grade {item.grade || "-"}
+                      </div>
                     </div>
 
-                    <div className="miniScoreCard">
-                      <span className="miniScoreLabel">Potential</span>
-                      <strong className="miniScoreValue">
-                        {item.potential_score ?? "-"}
-                      </strong>
-                    </div>
+                    <div className="trackerStats">
+                      <div className="miniScoreCard">
+                        <span className="miniScoreLabel">Current</span>
+                        <strong className="miniScoreValue">
+                          {item.presentation_score ?? "-"}
+                        </strong>
+                      </div>
 
-                    <div className="miniScoreCard">
-                      <span className="miniScoreLabel">Change</span>
-                      <strong
-                        className={`miniScoreValue ${
-                          change != null
-                            ? change > 0
-                              ? "scorePositive"
-                              : change < 0
-                              ? "scoreNegative"
+                      <div className="miniScoreCard">
+                        <span className="miniScoreLabel">Potential</span>
+                        <strong className="miniScoreValue">
+                          {item.potential_score ?? "-"}
+                        </strong>
+                      </div>
+
+                      <div className="miniScoreCard">
+                        <span className="miniScoreLabel">Change</span>
+                        <strong
+                          className={`miniScoreValue ${
+                            change != null
+                              ? change > 0
+                                ? "scorePositive"
+                                : change < 0
+                                ? "scoreNegative"
+                                : ""
                               : ""
-                            : ""
-                        }`}
-                      >
-                        {change == null ? "-" : change > 0 ? `+${change}` : change}
-                      </strong>
+                          }`}
+                        >
+                          {change == null ? "-" : change > 0 ? `+${change}` : change}
+                        </strong>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="scoreBlock">
-                    <div className="scoreHeader">
-                      <span>Current Presentation</span>
-                      <strong>{item.presentation_score ?? 0}/100</strong>
+                    <div className="scoreBlock">
+                      <div className="scoreHeader">
+                        <span>Current Presentation</span>
+                        <strong>{item.presentation_score ?? 0}/100</strong>
+                      </div>
+                      <div className="scoreBar">
+                        <div
+                          className="scoreFillCurrent"
+                          style={{ width: `${item.presentation_score ?? 0}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="scoreBar">
-                      <div
-                        className="scoreFillCurrent"
-                        style={{ width: `${item.presentation_score ?? 0}%` }}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="scoreBlock">
-                    <div className="scoreHeader">
-                      <span>Potential</span>
-                      <strong>{item.potential_score ?? 0}/100</strong>
+                    <div className="scoreBlock">
+                      <div className="scoreHeader">
+                        <span>Potential</span>
+                        <strong>{item.potential_score ?? 0}/100</strong>
+                      </div>
+                      <div className="scoreBar">
+                        <div
+                          className="scoreFillPotential"
+                          style={{ width: `${item.potential_score ?? 0}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="scoreBar">
-                      <div
-                        className="scoreFillPotential"
-                        style={{ width: `${item.potential_score ?? 0}%` }}
-                      />
-                    </div>
-                  </div>
 
-                  {item.result ? (
-                    <>
-                      <h4>Top Improvements</h4>
-                      <ul className="routineList">
-                        {item.result.topImprovements?.map(
-                          (improvement: string, i: number) => (
-                            <li key={i}>{improvement}</li>
-                          )
-                        )}
-                      </ul>
-                    </>
-                  ) : null}
+                    {item.result?.topImprovements ? (
+                      <>
+                        <h4>Top Improvements</h4>
+                        <ul className="routineList">
+                          {item.result.topImprovements.map(
+                            (improvement: string, i: number) => (
+                              <li key={i}>{improvement}</li>
+                            )
+                          )}
+                        </ul>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
+              </Link>
             );
           })
         ) : (

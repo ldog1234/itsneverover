@@ -14,14 +14,6 @@ type AnalysisResult = {
   suggestions: string[];
 };
 
-function getGrade(score: number) {
-  if (score >= 90) return "A";
-  if (score >= 80) return "B";
-  if (score >= 70) return "C";
-  if (score >= 60) return "D";
-  return "F";
-}
-
 export default function AnalyzePage() {
   const supabase = createClient();
 
@@ -103,9 +95,18 @@ export default function AnalyzePage() {
       setResult(aiResult);
       setStatus("Analysis complete.");
 
-      const grade = getGrade(aiResult.presentationScore);
+      const grade =
+        aiResult.presentationScore >= 90
+          ? "A"
+          : aiResult.presentationScore >= 80
+          ? "B"
+          : aiResult.presentationScore >= 70
+          ? "C"
+          : aiResult.presentationScore >= 60
+          ? "D"
+          : "F";
 
-      const { error: insertError } = await supabase.from("analyses").insert({
+      await supabase.from("analyses").insert({
         user_id: user.id,
         image_path: filePath,
         presentation_score: aiResult.presentationScore,
@@ -113,10 +114,6 @@ export default function AnalyzePage() {
         grade,
         result: aiResult,
       });
-
-      if (insertError) {
-        console.error(insertError);
-      }
     } catch (error: any) {
       setStatus(error.message || "Something went wrong.");
     } finally {
@@ -131,7 +128,44 @@ export default function AnalyzePage() {
         <p>Upload a clear photo to get presentation and potential scores.</p>
       </section>
 
-      <section className="analyzeLayout">
+      <section className="analyzePageGrid">
+        <div className="card uploadGuideCard">
+          <h2>Best Photo Setup</h2>
+          <div className="guideChecklist">
+            <div className="guideItem">
+              <span className="guideCheck">✓</span>
+              <div>
+                <strong>Face forward</strong>
+                <p>Keep your head straight and centered in frame.</p>
+              </div>
+            </div>
+
+            <div className="guideItem">
+              <span className="guideCheck">✓</span>
+              <div>
+                <strong>Good lighting</strong>
+                <p>Use bright natural light or even indoor light.</p>
+              </div>
+            </div>
+
+            <div className="guideItem">
+              <span className="guideCheck">✓</span>
+              <div>
+                <strong>No filters</strong>
+                <p>Avoid blur, beauty effects, or heavy editing.</p>
+              </div>
+            </div>
+
+            <div className="guideItem">
+              <span className="guideCheck">✓</span>
+              <div>
+                <strong>Neutral expression</strong>
+                <p>Relax your face so the analysis is more consistent.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="card uploadCard">
           <h2>Upload Photo</h2>
 
@@ -155,7 +189,9 @@ export default function AnalyzePage() {
 
           {status ? <p className="mutedText">{status}</p> : null}
         </div>
+      </section>
 
+      <section className="analyzeLayout" style={{ marginTop: 20 }}>
         <div className="card previewCard">
           <h2>Preview</h2>
 
@@ -175,7 +211,15 @@ export default function AnalyzePage() {
                 <div className="gradeBlock">
                   <span className="gradeLabel">Grade</span>
                   <span className="gradeValue">
-                    {getGrade(result.presentationScore)}
+                    {result.presentationScore >= 90
+                      ? "A"
+                      : result.presentationScore >= 80
+                      ? "B"
+                      : result.presentationScore >= 70
+                      ? "C"
+                      : result.presentationScore >= 60
+                      ? "D"
+                      : "F"}
                   </span>
                 </div>
 

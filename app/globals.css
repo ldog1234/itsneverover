@@ -805,3 +805,70 @@ line-height:1.4;
     grid-template-columns: 1fr;
   }
 }
+
+.trackerLinkCard {
+  text-decoration: none;
+  color: inherit;
+}
+
+.trackerLinkCard:hover .trackerCard {
+  transform: translateY(-2px);
+  transition: 0.2s ease;
+}
+
+.reportPageGrid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.analyzePageGrid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 20px;
+}
+
+.uploadGuideCard {
+  min-height: 100%;
+}
+
+.guideChecklist {
+  display: grid;
+  gap: 14px;
+}
+
+.guideItem {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #232330;
+  background: #0d0d14;
+}
+
+.guideCheck {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6d5efc, #d946ef);
+  color: white;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.guideItem p {
+  margin: 6px 0 0;
+  color: #b8b8c7;
+}
+
+@media (max-width: 900px) {
+  .reportPageGrid,
+  .analyzePageGrid {
+    grid-template-columns: 1fr;
+  }
+}
