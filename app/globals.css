@@ -1,0 +1,285 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: #0b0b0f;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  border-bottom: 1px solid #1f1f28;
+  background: rgba(10, 10, 15, 0.95);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.navLinks {
+  display: flex;
+  gap: 18px;
+  color: #d7d7df;
+}
+
+.page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.hero {
+  padding: 60px 0 40px;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 8px 14px;
+  border: 1px solid #2a2a36;
+  border-radius: 999px;
+  background: #11111a;
+  color: #c9c9d4;
+  font-size: 0.9rem;
+}
+
+.heroTitle {
+  font-size: clamp(2.3rem, 5vw, 4.5rem);
+  line-height: 1.05;
+  margin: 0 0 18px;
+}
+
+.heroText {
+  max-width: 760px;
+  margin: 0 auto 28px;
+  color: #b8b8c7;
+  font-size: 1.08rem;
+  line-height: 1.6;
+}
+
+.heroButtons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-weight: 600;
+  transition: 0.2s ease;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #6d5efc, #4f46e5);
+  border: none;
+  color: white;
+}
+
+.primaryButton:hover {
+  transform: translateY(-1px);
+  opacity: 0.96;
+}
+
+.secondaryButton {
+  background: transparent;
+  border: 1px solid #2e2e3a;
+  color: white;
+}
+
+.secondaryButton:hover {
+  background: #14141c;
+}
+
+.disabledButton {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.card {
+  background: linear-gradient(180deg, #12121a, #0f0f16);
+  border: 1px solid #232330;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.card h2,
+.card h3 {
+  margin-top: 0;
+}
+
+.card p {
+  color: #b8b8c7;
+  line-height: 1.6;
+}
+
+.sectionHeader {
+  margin-bottom: 26px;
+}
+
+.sectionHeader h1 {
+  margin: 0 0 10px;
+  font-size: 2.5rem;
+}
+
+.sectionHeader p {
+  margin: 0;
+  color: #b8b8c7;
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+.analyzeLayout,
+.routineWrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.uploadCard,
+.previewCard,
+.formCard,
+.resultCard {
+  min-height: 380px;
+}
+
+.uploadBox {
+  margin-top: 18px;
+  border: 2px dashed #343446;
+  border-radius: 16px;
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  cursor: pointer;
+  text-align: center;
+  background: #101018;
+  color: #cfcfe0;
+}
+
+.uploadBox:hover {
+  border-color: #5b52f5;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.fileName {
+  color: #b8b8c7;
+  margin-top: 14px;
+  font-size: 0.95rem;
+}
+
+.previewImage {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid #2a2a36;
+}
+
+.emptyPreview {
+  width: 100%;
+  min-height: 320px;
+  border-radius: 16px;
+  border: 1px dashed #343446;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f8fa3;
+  background: #101018;
+  text-align: center;
+  padding: 20px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  font-weight: 600;
+}
+
+.textInput {
+  width: 100%;
+  padding: 14px 14px;
+  border-radius: 12px;
+  border: 1px solid #2a2a36;
+  background: #0e0e15;
+  color: white;
+  outline: none;
+  margin-bottom: 6px;
+}
+
+.textInput:focus {
+  border-color: #5b52f5;
+}
+
+.mutedText {
+  color: #b8b8c7;
+}
+
+.routineList {
+  padding-left: 20px;
+  color: #d9d9e5;
+  line-height: 1.8;
+}
+
+.dashboardGrid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 900px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+  .navLinks {
+    gap: 12px;
+    font-size: 0.95rem;
+  }
+
+  .page {
+    padding: 32px 18px 48px;
+  }
