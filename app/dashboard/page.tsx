@@ -6,6 +6,26 @@ function getChange(current: number | null, previous: number | null) {
   return current - previous;
 }
 
+function getAverage(values: number[]) {
+  if (!values.length) return 0;
+  return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length);
+}
+
+function getStreak(dates: string[]) {
+  if (!dates.length) return 0;
+
+  const uniqueDays = Array.from(
+    new Set(
+      dates.map((date) => {
+        const d = new Date(date);
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      })
+    )
+  );
+
+  return uniqueDays.length;
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 
@@ -22,12 +42,50 @@ export default async function DashboardPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  const scores = (analyses ?? [])
+    .map((item) => item.presentation_score)
+    .filter((score): score is number => typeof score === "number");
+
+  const bestScore = scores.length ? Math.max(...scores) : 0;
+  const averageScore = getAverage(scores);
+  const streak = getStreak((analyses ?? []).map((item) => item.created_at));
+  const latestScore = analyses?.[0]?.presentation_score ?? null;
+  const isPersonalBest = latestScore != null && latestScore === bestScore && scores.length > 0;
+
   return (
     <main className="page">
       <section className="sectionHeader">
         <h1>Glow-Up Tracker</h1>
-        <p>Your saved reports and score progress over time.</p>
+        <p>Your saved reports, score trends, and progress over time.</p>
       </section>
+
+      <section className="trackerOverview">
+        <div className="miniScoreCard">
+          <span className="miniScoreLabel">Best Score Ever</span>
+          <strong className="miniScoreValue">{bestScore || "-"}</strong>
+        </div>
+
+        <div className="miniScoreCard">
+          <span className="miniScoreLabel">Average Score</span>
+          <strong className="miniScoreValue">{averageScore || "-"}</strong>
+        </div>
+
+        <div className="miniScoreCard">
+          <span className="miniScoreLabel">Uploads Logged</span>
+          <strong className="miniScoreValue">{analyses?.length ?? 0}</strong>
+        </div>
+
+        <div className="miniScoreCard">
+          <span className="miniScoreLabel">Tracker Streak</span>
+          <strong className="miniScoreValue">{streak}</strong>
+        </div>
+      </section>
+
+      {isPersonalBest ? (
+        <div className="personalBestBanner">
+          🏆 Personal Record — your latest report is your best score yet.
+        </div>
+      ) : null}
 
       {error ? <p className="mutedText">Failed to load reports.</p> : null}
 
